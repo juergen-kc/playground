@@ -1,9 +1,5 @@
- 
-#Download AzCopy
+ #Download AzCopy
 Invoke-WebRequest -Uri "https://aka.ms/downloadazcopy-v10-windows" -OutFile C:\WIndows\Temp\AzCopy.zip -UseBasicParsing
- 
-#Curl.exe option (Windows 10 Spring 2018 Update (or later))
-# curl.exe -L -o "C:\Windows\Temp\AzCopy\AzCopy.zip" https://aka.ms/downloadazcopy-v10-windows
  
 #Expand Archive
 Expand-Archive C:\WIndows\Temp\AzCopy.zip -DestinationPath C:\Windows\Temp\AzCopy\ -Force
@@ -14,14 +10,13 @@ Get-ChildItem ./AzCopy/*/azcopy.exe | Move-Item -Destination "C:\Windows\Temp\Az
 #Remove download folder
 Remove-Item -Path C:\Windows\Temp\AzCopy\ -Force -Recurse
  
-#Add your AzCopy path to the Windows environment PATH (C:\Users\thmaure\AzCopy in this example), e.g., using PowerShell:
-$userenv = [System.Environment]::GetEnvironmentVariable("Path", "User")
-[System.Environment]::SetEnvironmentVariable("PATH", $userenv + ";C:\Windows\Temp\AzCopy\", "User")
-
 Set-Location C:\Windows\Temp
+
+#Launch Azure Auth via Device Login
 Start-Process msedge.exe https://microsoft.com/devicelogin
 
+#Trigger AzCopy and present token
 .\AzCopy.exe login
 
- 
+#Download Paylod from Azure Blob 
 .\AzCopy.exe copy "https://blob4autopilot.blob.core.windows.net/aad-blob" "C:\Windows\Temp\autopilot" --recursive
