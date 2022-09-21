@@ -7,6 +7,9 @@ Expand-Archive C:\WIndows\Temp\AzCopy.zip -DestinationPath C:\Windows\Temp\AzCop
 #Move AzCopy to the destination you want to store it
 Get-ChildItem ./AzCopy/*/azcopy.exe | Move-Item -Destination "C:\Windows\Temp\AzCopy.exe"
 
+#Wait for a moment
+Sleep 10
+
 #Remove download folder
 Remove-Item -Path C:\Windows\Temp\AzCopy\ -Force -Recurse
  
