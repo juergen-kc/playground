@@ -8,3 +8,6 @@ Start-Process msedge.exe https://microsoft.com/devicelogin
 
 #Download Paylod from Azure Blob 
 .\AzCopy.exe copy "https://blob4autopilot.blob.core.windows.net/aad-blob" "C:\Windows\Temp\autopilot" --recursive
+
+#Launch AutoPilot-Script 
+Start-Process -FilePath "powershell" -Verb RunAs -File .\autopilot\aad-blob\JCAutoPilotKeypass.ps1
