@@ -10,3 +10,5 @@ Get-ChildItem ./AzCopy/*/azcopy.exe | Move-Item -Destination "C:\Windows\Temp\Az
 #Remove download folder
 Remove-Item -Path C:\Windows\Temp\AzCopy\ -Force -Recurse
  
+#Wait for a moment
+Sleep 15
