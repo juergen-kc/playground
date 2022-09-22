@@ -10,4 +10,4 @@ Start-Process msedge.exe https://microsoft.com/devicelogin
 .\AzCopy.exe copy "https://blob4autopilot.blob.core.windows.net/aad-blob" "C:\Windows\Temp\autopilot" --recursive
 
 #Launch AutoPilot-Script 
-Start-Process -FilePath "powershell" -Verb RunAs -File .\autopilot\aad-blob\JCAutoPilotKeypass.ps1
+Start-Process "powershell.exe" -File C:\Windows\Temp\autopilot\aad-blob\JCAutoPilotKeypass.ps1
