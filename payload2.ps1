@@ -15,3 +15,6 @@ Write-Host "Copying required files to this device" -BackgroundColor Black -Foreg
 #Launch AutoPilot-Script 
 powershell.exe C:\Windows\Temp\autopilot\aad-blob\JCAutoPilotKeypass.ps1
 Write-Host "Launching the AutoPilot-Script" -BackgroundColor Black -ForegroundColor Cyan
+
+#Close session of AzCopy
+.\AzCopy.exe logout
