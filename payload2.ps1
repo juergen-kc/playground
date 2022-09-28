@@ -13,7 +13,7 @@ Write-Host "Trigger AzCopy to login" -BackgroundColor Black -ForegroundColor Cya
 Write-Host "Copying required files to this device" -BackgroundColor Black -ForegroundColor Cyan
 
 #Launch AutoPilot-Script 
-powershell.exe C:\Windows\Temp\autopilot\aad-blob\JCAutoPilotKeypass.ps1
+powershell.exe C:\Windows\Temp\autopilot\aad-blob\220928-JCAutoPilotKeypass-working.ps1
 Write-Host "Launching the AutoPilot-Script" -BackgroundColor Black -ForegroundColor Cyan
 
 #Close session of AzCopy
