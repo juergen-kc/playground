@@ -1,0 +1,389 @@
+---
+openapi: 3.0.0
+info:
+  title: Directory Insights API
+  description: |-
+    # Overview
+
+    Directory Insights allows you to read event logs, view activity in your directory, and monitor user authentications to the console, RADIUS, LDAP, and SSO apps. Directory Insights analyzes the audit trails that lead to critical events so you know the what, where, when, how, and who of your directory activities.
+
+    + __Directory Events__: Logs activity in the Admin Portal and User Portal, including admin changes in the directory and admin/user authentications to the Admin Portal and User Portal.
+    + __SAML Events__: Logs user authentications to SAML applications.
+    + __RADIUS Events__: Logs user authentications to RADIUS. Used for Wi-Fi and VPNs.
+    + __MacOS, Windows and Linux Events__: Logs user authentications to systems, including agent related events on lockout, password changes, and File Disk Encryption key updates.
+    + __LDAP Events__: Logs user authentications to LDAP, including LDAP Bind and Search event types.
+    + __MDM Events__: Logs MDM command results.
+    + __Managed Service Provider Events__: Logs activities on the Managed Service Providers (MSP) portal.
+    + __Software Events__: Logs software or plugins detected on the local device.
+    + __Password Manager Events__: Logs activity related to JumpCloud password manager.
+
+    # Using the Directory Insights API
+
+    ## JSON POST Request Body
+
+    Queries are made by HTTP POST request to the API's `/events` web context, using curl, Postman, wget, or any other HTTP client.
+
+    The two required fields in the JSON body are:
+
+    ```json
+    {
+        "service": [
+            "service name"
+        ],
+        "start_time": "RFC 3339 date"
+    }
+    ```
+
+    Valid values for `service` are:
+
+    + __all__: Logs from all services.
+    + __directory__: Logs activity in the Admin Portal and User Portal, including admin changes in the directory and admin/user authentications to the Admin Portal and User Portal.
+    + __ldap__: Logs user authentications to LDAP, including LDAP Bind and Search event types.
+    + __mdm__: Logs MDM command results.
+    + __password_manager__: Logs activity related to JumpCloud password manager.
+    + __radius__: Logs user authentications to RADIUS, used for Wi-Fi and VPNs.
+    + __software__: Logs application activity when software is added, removed, or changed on a macOS, Windows, or Linux device. Events are logged based on changes to an application version during each device check-in.
+    + __sso__: Logs user authentications to SAML applications.
+    + __systems__: Logs user authentications to MacOS, Windows, and Linux systems, including agent-related events on lockout, password changes, and File Disk Encryption key updates.
+
+    Choose a start time you'd like the service to start searching. Specify an RFC3339-formatted UTC date in the following format: `yyyy-mm-ddTHH:mm:ssZ` (timezone optional, reference RFC3339 or use Z). For example, RFC3339 = "2020-01-01T14:00:00Z".
+
+    You'll be informed about missing or invalid date formats, as well as start dates in the future and end dates before start dates.
+
+    Putting these two required fields together, you can search for RADIUS events on or after Jan 1st 2020 2pm UTC with the following JSON HTTP body:
+
+
+    Beta and EA Features are confidential and JumpCloud disclaims all obligations or liabilities with respect to it. Please review your agreement for more details.
+  contact:
+    name: JumpCloud Support
+    url: https://support.jumpcloud.com/support/s/
+    email: support@jumpcloud.com
+  version: 1.0-oas3
+servers:
+- url: https://api.jumpcloud.com/insights/directory/v1
+tags:
+- name: EventDistinctQuery
+- name: EventIntervalQuery
+- name: EventQuery
+- name: Reports
+paths:
+  /events:
+    post:
+      tags:
+      - EventQuery
+      summary: Query Events
+      description: |-
+        Query the API for Directory Insights events
+        #### Sample Request
+        ```
+        curl -X POST 'https://api.jumpcloud.com/insights/directory/v1/events' -H 'Content-Type: application/json' -H 'x-api-key: REPLACE_KEY_VALUE' --data '{"service": ["all"], "start_time": "2021-07-14T23:00:00Z", "end_time": "2021-07-28T14:00:00Z", "sort": "DESC", "fields": ["timestamp", "event_type", "initiated_by", "success", "client_ip", "provider", "organization"]}'
+        ```
+      operationId: directoryInsights_eventsPost
+      requestBody:
+        $ref: '#/components/requestBodies/EventQuery'
+      responses:
+        "200":
+          description: Array of Directory Insights events JSON objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+        "400":
+          description: Invalid/unknown query JSON body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "401":
+          description: Unauthorized (Invalid API Key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "402":
+          description: Directory Insights is not enabled for your organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "500":
+          description: Technical difficulties processing your request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      security:
+      - x-api-key: []
+        x-org-id: []
+      x-scopes:
+      - directoryinsights.readonly
+      x-codeSamples:
+      - lang: Shell
+        source: |-
+          curl --request POST \
+            --url https://api.jumpcloud.com/insights/directory/v1/events \
+            --header 'accept: application/json' \
+            --header 'content-type: application/json' \
+            --header 'x-api-key: REPLACE_KEY_VALUE' \
+            --data '{"end_time":"2019-08-24T14:15:22Z","service":["all"],"start_time":"2019-08-24T14:15:22Z","fields":["string"],"limit":0,"q":"string","search_after":[{}],"search_term":{"and":{},"not":{},"or":{}},"sort":"string"}'
+      - lang: Python
+        source: |-
+          import requests
+
+          url = "https://api.jumpcloud.com/insights/directory/v1/events"
+
+          payload = {
+              "end_time": "2019-08-24T14:15:22Z",
+              "service": ["all"],
+              "start_time": "2019-08-24T14:15:22Z",
+              "fields": ["string"],
+              "limit": 0,
+              "q": "string",
+              "search_after": [{}],
+              "search_term": {
+                  "and": {},
+                  "not": {},
+                  "or": {}
+              },
+              "sort": "string"
+          }
+          headers = {
+              "accept": "application/json",
+              "x-api-key": "REPLACE_KEY_VALUE",
+              "content-type": "application/json"
+          }
+
+          response = requests.request("POST", url, json=payload, headers=headers)
+
+          print(response.text)
+      - lang: Powershell
+        source: |-
+          $headers=@{}
+          $headers.Add("accept", "application/json")
+          $headers.Add("x-api-key", "REPLACE_KEY_VALUE")
+          $headers.Add("content-type", "application/json")
+          $response = Invoke-RestMethod -Uri 'https://api.jumpcloud.com/insights/directory/v1/events' -Method POST -Headers $headers -ContentType 'application/json' -Body '{"end_time":"2019-08-24T14:15:22Z","service":["all"],"start_time":"2019-08-24T14:15:22Z","fields":["string"],"limit":0,"q":"string","search_after":[{}],"search_term":{"and":{},"not":{},"or":{}},"sort":"string"}'
+  /events/count:
+    post:
+      tags:
+      - EventQuery
+      summary: Count Events
+      description: |-
+        Query the API for a count of matching events
+        #### Sample Request
+        ```
+        curl -X POST 'https://api.jumpcloud.com/insights/directory/v1/events/count' -H 'Content-Type: application/json' -H 'x-api-key: REPLACE_KEY_VALUE' --data '{"service": ["all"], "start_time": "2021-07-14T23:00:00Z", "end_time": "2021-07-28T14:00:00Z", "sort": "DESC", "fields": ["timestamp", "event_type", "initiated_by", "success", "client_ip", "provider", "organization"]}'
+        ```
+      operationId: directoryInsights_eventsCountPost
+      requestBody:
+        $ref: '#/components/requestBodies/EventQuery'
+      responses:
+        "200":
+          description: Count of matching event rows
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventCount'
+        "400":
+          description: Invalid/unknown query JSON body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "401":
+          description: Unauthorized (Invalid API Key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "402":
+          description: Directory Insights is not enabled for your organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        "500":
+          description: Technical difficulties processing your request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      security:
+      - x-api-key: []
+        x-org-id: []
+      x-scopes:
+      - directoryinsights.readonly
+      x-codeSamples:
+      - lang: Shell
+        source: |-
+          curl --request POST \
+            --url https://api.jumpcloud.com/insights/directory/v1/events/count \
+            --header 'accept: application/json' \
+            --header 'content-type: application/json' \
+            --header 'x-api-key: REPLACE_KEY_VALUE' \
+            --data '{"end_time":"2019-08-24T14:15:22Z","service":["all"],"start_time":"2019-08-24T14:15:22Z","fields":["string"],"limit":0,"q":"string","search_after":[{}],"search_term":{"and":{},"not":{},"or":{}},"sort":"string"}'
+      - lang: Python
+        source: |-
+          import requests
+
+          url = "https://api.jumpcloud.com/insights/directory/v1/events/count"
+
+          payload = {
+              "end_time": "2019-08-24T14:15:22Z",
+              "service": ["all"],
+              "start_time": "2019-08-24T14:15:22Z",
+              "fields": ["string"],
+              "limit": 0,
+              "q": "string",
+              "search_after": [{}],
+              "search_term": {
+                  "and": {},
+                  "not": {},
+                  "or": {}
+              },
+              "sort": "string"
+          }
+          headers = {
+              "accept": "application/json",
+              "x-api-key": "REPLACE_KEY_VALUE",
+              "content-type": "application/json"
+          }
+
+          response = requests.request("POST", url, json=payload, headers=headers)
+
+          print(response.text)
+      - lang: Powershell
+        source: |-
+          $headers=@{}
+          $headers.Add("accept", "application/json")
+          $headers.Add("x-api-key", "REPLACE_KEY_VALUE")
+          $headers.Add("content-type", "application/json")
+          $response = Invoke-RestMethod -Uri 'https://api.jumpcloud.com/insights/directory/v1/events/count' -Method POST -Headers $headers -ContentType 'application/json' -Body '{"end_time":"2019-08-24T14:15:22Z","service":["all"],"start_time":"2019-08-24T14:15:22Z","fields":["string"],"limit":0,"q":"string","search_after":[{}],"search_term":{"and":{},"not":{},"or":{}},"sort":"string"}'
+components:
+  schemas:
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Text detailed error message returned by the service
+    EventCount:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int64
+      description: EventCount JSON struct with count of matching events
+    EventQuery:
+      description: EventQuery is the users' command to search our auth logs
+      allOf:
+      - $ref: '#/components/schemas/EventServiceTimeQuery'
+      - type: object
+        properties:
+          fields:
+            type: array
+            description: optional list of fields to return from query
+            items:
+              type: string
+            x-go-name: Projection
+          limit:
+            type: integer
+            description: Max number of rows to return
+            format: int64
+            x-go-name: Limit
+          q:
+            type: string
+            description: optional string for specifying a full text query
+            x-go-name: Q
+          search_after:
+            type: array
+            description: "Specific query to search after, see x-* response headers for next values"
+            items:
+              type: object
+            x-go-name: SearchAfter
+          search_term:
+            $ref: '#/components/schemas/SearchTerm'
+          sort:
+            type: string
+            description: ASC or DESC order for timestamp
+            x-go-name: Sort
+    EventServiceTimeQuery:
+      required:
+      - service
+      - start_time
+      type: object
+      properties:
+        end_time:
+          type: string
+          description: "optional query end time, UTC in RFC3339 format"
+          format: date-time
+        service:
+          type: array
+          description: service name to query.
+          items:
+            type: string
+            enum:
+            - all
+            - directory
+            - ldap
+            - mdm
+            - password_manager
+            - radius
+            - software
+            - sso
+            - systems
+        start_time:
+          type: string
+          description: "query start time, UTC in RFC3339 format"
+          format: date-time
+      description: |-
+        EventServiceTimeQuery is the base struct for most event queries
+        it includes the minimum-required fields of service and start/end times
+    SearchTerm:
+      type: object
+      properties:
+        and:
+          $ref: '#/components/schemas/TermConjunction'
+        not:
+          $ref: '#/components/schemas/TermConjunction'
+        or:
+          $ref: '#/components/schemas/TermConjunction'
+      description: |-
+        SearchTerm is the filter portion of the query
+        it contains only one of 'and', 'or', or 'not' conjunction maps
+    TermConjunction:
+      type: object
+      description: |-
+        TermConjunction represents a conjunction (and/or)
+        NOTE: the validator limits what the operator can be, not the object
+        for future-proof-ness
+        and a list of sub-values
+  requestBodies:
+    EventQuery:
+      description: JSON event query body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EventQuery'
+      required: true
+  securitySchemes:
+    x-api-key:
+      type: apiKey
+      name: x-api-key
+      in: header
+    x-org-id:
+      type: apiKey
+      name: x-org-id
+      in: header
+x-scopes:
+- directoryinsights.readonly
+x-tagGroups:
+- name: endpoints
+  tags:
+  - EventDistinctQuery
+  - EventIntervalQuery
+  - EventQuery
+  - Reports
