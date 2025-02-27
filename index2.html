@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="origin-trial" content="AueT6p1F8kLJ75CnO3g6EgXr4X12syOnsSXIO9lnkIxw4oWSZESmDtKJbG+LrJzsYvVShhwl0A19g8D463l7sQgAAABPeyJvcmlnaW4iOiJodHRwOi8vMTI3LjAuMC4xOjgwIiwiZmVhdHVyZSI6IlRyYW5zbGF0aW9uQVBJIiwiZXhwaXJ5IjoxNzUzMTQyNDAwfQ==">
+    <title>JumpCloud Admin Portal - Translator API PoC</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; }
+        .sidebar { width: 250px; background: #1a2a3a; color: white; padding: 20px; height: 100vh; }
+        .content { flex: 1; padding: 20px; }
+        .box { padding: 15px; background: #f4f4f4; margin-bottom: 10px; border-radius: 5px; }
+        .translate { transition: all 0.3s; }
+        .language-selector { margin-bottom: 20px; }
+        .status { padding: 10px; margin-bottom: 20px; font-weight: bold; border-radius: 5px; }
+        .status.ok { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.warning { background: #fff3cd; color: #856404; }
+        #user-list { margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2 class="translate">JumpCloud</h2>
+        <ul>
+            <li class="translate">Dashboard</li>
+            <li class="translate">Users</li>
+            <li class="translate">Devices</li>
+            <li class="translate">Settings</li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <h1 class="translate">Welcome, Admin!</h1>
+
+        <!-- Status Indicators -->
+        <div id="status-indicator" class="status">Checking AI Model...</div>
+        <div id="translation-status" class="status"></div>
+
+        <!-- Language Selector -->
+        <label for="language-selector" class="translate">Choose Language:</label>
+        <select id="language-selector" class="language-selector">
+            <option value="en">English</option>
+            <option value="fr">French</option>
+            <option value="es">Spanish</option>
+            <option value="de">German</option>
+        </select>
+
+        <div class="box translate">Users: <span id="user-count">0</span></div>
+        <div class="box translate">Managed Devices: 12</div>
+        <div class="box translate">Pending Approvals: 3</div>
+        <div class="box translate">Security Alerts: 2</div>
+
+        <!-- Dynamic User List -->
+        <h2 class="translate">User List</h2>
+        <ul id="user-list"></ul>
+    </div>
+
+    <script>
+        let userData = [];
+        let currentLanguage = "en";
+        let translatorInstance = null;
+        let isTranslating = false;
+
+        async function checkAIStatus() {
+            const statusElement = document.getElementById("status-indicator");
+            const translationStatus = document.getElementById("translation-status");
+
+            if (!('ai' in self && 'translator' in self.ai)) {
+                statusElement.innerText = "❌ Translator API Not Available";
+                statusElement.classList.add("error");
+                return;
+            }
+
+            const capabilities = await self.ai.translator.capabilities();
+            console.log("AI Translator Capabilities:", capabilities);
+
+            if (capabilities.onDevice) {
+                statusElement.innerText = "✅ Using Local AI (Gemini Nano)";
+                statusElement.classList.add("ok");
+            } else {
+                statusElement.innerText = "⚠️ Translator API Available but Not Local";
+                statusElement.classList.add("error");
+            }
+
+            translationStatus.innerText = ""; // Clear previous messages
+        }
+
+        // Fetch user data from a mock API
+        async function fetchUserData() {
+            try {
+                const response = await fetch("users.json");
+                if (!response.ok) throw new Error("Failed to fetch users.json");
+                userData = await response.json();
+                displayUserData();
+                await translatePage(); // Ensures API data is also translated
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        }
+
+        // Display fetched user data
+        function displayUserData() {
+            const userList = document.getElementById("user-list");
+            userList.innerHTML = ""; // Clear previous list
+
+            userData.forEach(user => {
+                const li = document.createElement("li");
+                li.classList.add("translate");
+                li.setAttribute("data-original-text", `User: ${user.name} - Role: ${user.role}`);
+                li.innerText = `User: ${user.name} - Role: ${user.role}`;
+                userList.appendChild(li);
+            });
+
+            document.getElementById("user-count").innerText = userData.length;
+        }
+
+        // Ensures all text elements always translate correctly
+        async function translatePage() {
+            if (isTranslating) return;
+            isTranslating = true;
+
+            const translationStatus = document.getElementById("translation-status");
+            translationStatus.innerText = "⏳ Translating..."; // Show in-progress message
+
+            if (!('ai' in self && 'translator' in self.ai)) {
+                console.warn("Translation API is not available.");
+                translationStatus.innerText = "❌ Translation API is not available.";
+                translationStatus.classList.add("error");
+                isTranslating = false;
+                return;
+            }
+
+            try {
+                const translatorCapabilities = await self.ai.translator.capabilities();
+                console.log("AI Translator Capabilities:", translatorCapabilities);
+
+                if (!translatorCapabilities.languagePairAvailable("en", currentLanguage)) {
+                    translationStatus.innerText = `❌ Translation not available for ${currentLanguage}. Ensure language packs are installed.`;
+                    translationStatus.classList.add("error");
+                    isTranslating = false;
+                    return;
+                }
+
+                // Create or reuse translator instance
+                if (!translatorInstance || translatorInstance.targetLanguage !== currentLanguage) {
+                    translatorInstance = await self.ai.translator.create({
+                        sourceLanguage: "en",
+                        targetLanguage: currentLanguage
+                    });
+                }
+
+                const elements = document.querySelectorAll(".translate");
+                const translationPromises = [];
+
+                for (let el of elements) {
+                    let originalText = el.getAttribute("data-original-text") || el.innerText;
+                    if (!el.getAttribute("data-original-text")) {
+                        el.setAttribute("data-original-text", originalText);
+                    }
+                    translationPromises.push(translatorInstance.translate(originalText).then(translatedText => {
+                        el.innerText = translatedText;
+                    }));
+                }
+
+                await Promise.all(translationPromises);
+                translationStatus.innerText = "✅ Translation completed successfully!";
+                translationStatus.classList.add("ok");
+
+            } catch (error) {
+                console.error("Translation error:", error);
+                translationStatus.innerText = "❌ Translation failed.";
+                translationStatus.classList.add("error");
+            } finally {
+                isTranslating = false;
+            }
+        }
+
+        document.getElementById("language-selector").addEventListener("change", async function(event) {
+            currentLanguage = event.target.value;
+            await translatePage();
+        });
+
+        checkAIStatus();
+        fetchUserData();
+    </script>
+
+</body>
+</html>
