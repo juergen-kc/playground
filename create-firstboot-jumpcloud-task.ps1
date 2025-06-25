@@ -1,16 +1,20 @@
-# Create install script for JumpCloud Agent
+# Set variables
+$TaskName = "InstallJumpCloudAgent"
+$ScriptPath = "C:\Windows\Temp\InstallJumpCloudAgent.ps1"
+
+# Save the install script to disk
 $jcScript = @"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Set-Location -Path `$env:TEMP
-Invoke-RestMethod -Method Get -Uri https://raw.githubusercontent.com/TheJumpCloud/support/master/scripts/windows/InstallWindowsAgent.ps1 -OutFile InstallWindowsAgent.ps1
-.\InstallWindowsAgent.ps1 -JumpCloudConnectKey "jcc_eyJwdWJsaWNLaWNrc3RhcnRVcmwiOiJodHRwczovL2tpY2tzdGFydC5qdW1wY2xvdWQuY29tIiwicHJpdmF0ZUtpY2tzdGFydFVybCI6Imh0dHBzOi8vcHJpdmF0ZS1raWNrc3RhcnQuanVtcGNsb3VkLmNvbSIsImNvbm5lY3RLZXkiOiJiMWU3ZjhhNGEwNjdhNTMxMmI1YzU5YTU0ZTE4ZjVlNmRmOTRkZjE3In0g"
+Invoke-RestMethod -Method Get -URI https://raw.githubusercontent.com/TheJumpCloud/support/master/scripts/windows/InstallWindowsAgent.ps1 -OutFile $ScriptPath
+Start-Process powershell.exe -ArgumentList \"-ExecutionPolicy Bypass -File `"$ScriptPath`" -JumpCloudConnectKey 'jcc_eyJwdWJsaWNLaWNrc3RhcnRVcmwiOiJodHRwczovL2tpY2tzdGFydC5qdW1wY2xvdWQuY29tIiwicHJpdmF0ZUtpY2tzdGFydFVybCI6Imh0dHBzOi8vcHJpdmF0ZS1raWNrc3RhcnQuanVtcGNsb3VkLmNvbSIsImNvbm5lY3RLZXkiOiJiMWU3ZjhhNGEwNjdhNTMxMmI1YzU5YTU0ZTE4ZjVlNmRmOTRkZjE3In0g'\" -Verb RunAs
 "@
 
-$jcScriptPath = "C:\JC\install-jumpcloud.ps1"
-New-Item -Path "C:\JC" -ItemType Directory -Force | Out-Null
-$jcScript | Set-Content -Path $jcScriptPath -Encoding UTF8
+Set-Content -Path $ScriptPath -Value $jcScript -Force
 
-# Add RunOnce registry key to execute script on first boot
-Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" `
-  -Name "InstallJumpCloudAgent" `
-  -Value "powershell -ExecutionPolicy Bypass -File `"$jcScriptPath`""
+# Create scheduled task
+$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$ScriptPath`""
+$Trigger = New-ScheduledTaskTrigger -AtStartup
+$Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+$Task = New-ScheduledTask -Action $Action -Trigger $Trigger -Principal $Principal
+
+Register-ScheduledTask -TaskName $TaskName -InputObject $Task
