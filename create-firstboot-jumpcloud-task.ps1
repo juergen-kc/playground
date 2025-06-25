@@ -6,5 +6,4 @@ Invoke-RestMethod -Method Get -Uri https://raw.githubusercontent.com/TheJumpClou
 "@
 Set-Content -Path $scriptPath -Value $jcScript -Encoding UTF8
 
-# Register the scheduled task to run once at startup
 schtasks.exe /Create /TN "InstallJumpCloudAgent" /TR "powershell.exe -ExecutionPolicy Bypass -File `"$scriptPath`"" /SC ONSTART /RL HIGHEST /RU "SYSTEM"
