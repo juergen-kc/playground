@@ -1,3 +1,4 @@
+# Create install script for JumpCloud Agent
 $jcScript = @"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Set-Location -Path `$env:TEMP
@@ -9,7 +10,7 @@ $jcScriptPath = "C:\JC\install-jumpcloud.ps1"
 New-Item -Path "C:\JC" -ItemType Directory -Force | Out-Null
 $jcScript | Set-Content -Path $jcScriptPath -Encoding UTF8
 
-# Add RunOnce key for first boot
+# Add RunOnce registry key to execute script on first boot
 Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" `
   -Name "InstallJumpCloudAgent" `
   -Value "powershell -ExecutionPolicy Bypass -File `"$jcScriptPath`""
