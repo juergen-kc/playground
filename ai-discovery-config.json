@@ -1,0 +1,108 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-11-17T00:00:00Z",
+  "description": "Configuration for macOS AI Tools & Infrastructure Discovery Script",
+  
+  "tools": {
+    "ollama": {
+      "enabled": true,
+      "category": "Ollama",
+      "app_paths": ["/Applications/Ollama.app"],
+      "cli_binaries": ["ollama", "/usr/local/bin/ollama"],
+      "ports": [11434],
+      "user_directories": [".ollama", "Library/Application Support/Ollama"],
+      "env_patterns": ["^OLLAMA_"],
+      "process_patterns": ["ollama"]
+    },
+    "lm_studio": {
+      "enabled": true,
+      "category": "LM Studio",
+      "app_paths": ["/Applications/LM Studio.app"],
+      "cli_binaries": ["lms", "/usr/local/bin/lms"],
+      "user_directories": ["Library/Application Support/LM Studio"],
+      "process_patterns": ["lm.studio", "lms"]
+    },
+    "jan": {
+      "enabled": true,
+      "category": "Jan",
+      "app_paths": ["/Applications/Jan.app"],
+      "user_directories": [],
+      "process_patterns": ["jan", "jan-server"]
+    },
+    "claude_desktop": {
+      "enabled": true,
+      "category": "Claude Desktop",
+      "app_paths": ["/Applications/Claude.app"],
+      "user_directories": [],
+      "process_patterns": ["claude", "anthropic"],
+      "process_exclusions": ["saoudrizwan.claude-dev"]
+    },
+    "open_webui": {
+      "enabled": true,
+      "category": "Open WebUI",
+      "app_paths": [],
+      "cli_binaries": ["/usr/local/bin/open-webui"],
+      "ports": [8080],
+      "user_directory_patterns": ["*open-webui*"]
+    }
+  },
+  
+  "model_files": {
+    "enabled": true,
+    "category": "AI Model Files",
+    "extensions": ["gguf", "safetensors", "bin", "pt", "ckpt"],
+    "min_size_mb": 200,
+    "max_results_per_type": 5,
+    "search_user_homes_only": true
+  },
+  
+  "system_checks": {
+    "launch_services": {
+      "enabled": true,
+      "category": "Launch Services",
+      "patterns": ["ollama", "lms", "lmstudio", "mcp", "cursor", "webui", "claude", "jan"],
+      "system_paths": ["/Library/LaunchDaemons", "/Library/LaunchAgents"],
+      "user_path": "Library/LaunchAgents"
+    },
+    "packages": {
+      "enabled": true,
+      "category": "Installed Packages",
+      "pkgutil_patterns": ["ollama", "claude", "cursor", "lmstudio", "jan"],
+      "brew_patterns": ["ollama", "lmstudio", "cursor"],
+      "brew_category": "Homebrew"
+    },
+    "docker": {
+      "enabled": true,
+      "category": "Docker Containers",
+      "image_patterns": ["ollama", "open-webui", "lmstudio", "jan"]
+    },
+    "network": {
+      "enabled": true,
+      "category": "Network Activity",
+      "connection_patterns": ["ollama", "anthropic", "cursor", "openai"],
+      "max_results": 5
+    },
+    "shell_configs": {
+      "enabled": true,
+      "category": "Shell Configuration",
+      "env_patterns": ["OLLAMA", "OPENWEBUI", "LMSTUDIO", "cursor", "claude"],
+      "shell_files": [".zshrc", ".bash_profile", ".bashrc", ".profile"],
+      "max_lines_per_file": 3
+    }
+  },
+  
+  "alerting": {
+    "high_risk_categories": ["Ollama", "AI Model Files", "Claude Desktop", "LM Studio"],
+    "exit_strategy": "high_risk_only",
+    "risk_thresholds": {
+      "low": 5,
+      "medium": 10
+    }
+  },
+  
+  "cache": {
+    "enabled": true,
+    "ttl_seconds": 3600,
+    "cache_file": "/tmp/ai-discovery-config.json"
+  }
+}
