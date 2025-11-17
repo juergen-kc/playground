@@ -1,7 +1,106 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "last_updated": "2025-11-17T00:00:00Z",
-  "description": "Configuration for macOS AI Tools & Infrastructure Discovery Script",
+  "description": "Unified configuration for macOS AI Tools & Dev Environment Discovery",
+  
+  "dev_tools": {
+    "vscode": {
+      "enabled": true,
+      "category": "VS Code",
+      "app_paths": [
+        "/Applications/Visual Studio Code.app",
+        "/Applications/Visual Studio Code - Insiders.app"
+      ],
+      "settings_paths": [
+        "Library/Application Support/Code/User/settings.json",
+        "Library/Application Support/Code - Insiders/User/settings.json"
+      ],
+      "ai_settings_keys": [
+        "github.copilot",
+        "anthropic.claude",
+        "continue",
+        "tabnine",
+        "cody",
+        "llm",
+        "ai.",
+        "openai"
+      ]
+    },
+    "cursor": {
+      "enabled": true,
+      "category": "Cursor IDE",
+      "app_paths": ["/Applications/Cursor.app"],
+      "settings_paths": [
+        "Library/Application Support/Cursor/User/settings.json",
+        ".cursor/mcp.json"
+      ]
+    },
+    "ai_extensions": {
+      "enabled": true,
+      "category": "AI Extensions",
+      "extensions": [
+        {
+          "id": "github.copilot",
+          "name": "GitHub Copilot",
+          "patterns": ["github.copilot"]
+        },
+        {
+          "id": "github.copilot-chat",
+          "name": "GitHub Copilot Chat",
+          "patterns": ["github.copilot-chat"]
+        },
+        {
+          "id": "anthropic.claude-dev",
+          "name": "Claude Dev",
+          "patterns": ["saoudrizwan.claude-dev", "anthropic.claude"]
+        },
+        {
+          "id": "continue.continue",
+          "name": "Continue",
+          "patterns": ["continue.continue"]
+        },
+        {
+          "id": "tabnine.tabnine-vscode",
+          "name": "Tabnine",
+          "patterns": ["tabnine.tabnine-vscode"]
+        },
+        {
+          "id": "sourcegraph.cody-ai",
+          "name": "Cody",
+          "patterns": ["sourcegraph.cody-ai"]
+        }
+      ],
+      "extension_dirs": [
+        "~/.vscode/extensions",
+        "~/.vscode-insiders/extensions",
+        "~/.cursor/extensions"
+      ]
+    }
+  },
+  
+  "mcp_servers": {
+    "enabled": true,
+    "category": "MCP Server",
+    "config_locations": [
+      "Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json",
+      "Library/Application Support/Code/User/mcp.json",
+      "Library/Application Support/Code - Insiders/User/mcp.json",
+      ".cursor/mcp.json",
+      ".vscode/mcp.json",
+      ".config/mcp/settings.json"
+    ],
+    "server_types": ["stdio", "http", "streamable-http"],
+    "sensitive_data": {
+      "enabled": true,
+      "category": "Sensitive Data",
+      "patterns": {
+        "api_keys": ["apiKey", "api_key", "API_KEY", "api-key"],
+        "tokens": ["token", "bearer", "authorization", "auth"],
+        "secrets": ["secret", "password", "credential"]
+      },
+      "header_patterns": ["authorization", "api-key", "x-api-key", "bearer"]
+    }
+  },
   
   "tools": {
     "ollama": {
@@ -60,15 +159,15 @@
     "launch_services": {
       "enabled": true,
       "category": "Launch Services",
-      "patterns": ["ollama", "lms", "lmstudio", "mcp", "cursor", "webui", "claude", "jan"],
+      "patterns": ["ollama", "lms", "lmstudio", "mcp", "cursor", "webui", "claude", "jan", "copilot"],
       "system_paths": ["/Library/LaunchDaemons", "/Library/LaunchAgents"],
       "user_path": "Library/LaunchAgents"
     },
     "packages": {
       "enabled": true,
       "category": "Installed Packages",
-      "pkgutil_patterns": ["ollama", "claude", "cursor", "lmstudio", "jan"],
-      "brew_patterns": ["ollama", "lmstudio", "cursor"],
+      "pkgutil_patterns": ["ollama", "claude", "cursor", "lmstudio", "jan", "vscode"],
+      "brew_patterns": ["ollama", "lmstudio", "cursor", "visual-studio-code"],
       "brew_category": "Homebrew"
     },
     "docker": {
@@ -79,25 +178,26 @@
     "network": {
       "enabled": true,
       "category": "Network Activity",
-      "connection_patterns": ["ollama", "anthropic", "cursor", "openai"],
+      "connection_patterns": ["ollama", "anthropic", "cursor", "openai", "github.com/copilot"],
       "max_results": 5
     },
     "shell_configs": {
       "enabled": true,
       "category": "Shell Configuration",
-      "env_patterns": ["OLLAMA", "OPENWEBUI", "LMSTUDIO", "cursor", "claude"],
+      "env_patterns": ["OLLAMA", "OPENWEBUI", "LMSTUDIO", "cursor", "claude", "OPENAI", "ANTHROPIC", "COPILOT"],
       "shell_files": [".zshrc", ".bash_profile", ".bashrc", ".profile"],
       "max_lines_per_file": 3
     }
   },
   
   "alerting": {
-    "high_risk_categories": ["Ollama", "AI Model Files", "Claude Desktop", "LM Studio"],
+    "high_risk_categories": ["Ollama", "AI Model Files", "Claude Desktop", "LM Studio", "MCP Server", "Sensitive Data"],
     "exit_strategy": "high_risk_only",
     "risk_thresholds": {
       "low": 5,
       "medium": 10
-    }
+    },
+    "sensitive_data_always_fails": true
   },
   
   "cache": {
@@ -106,3 +206,4 @@
     "cache_file": "/tmp/ai-discovery-config.json"
   }
 }
+
